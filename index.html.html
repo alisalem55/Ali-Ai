@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>بنّاء — أنشئ تطبيقك بالذكاء الاصطناعي</title>
+<style>
+:root{box-sizing:border-box;--bg:#faf7f5;--panel:#fff;--ink:#1c1917;--mute:#78716c;--line:#e7e2de;--acc:#e11d74;--acc2:#f97316;--me:#f5efeb;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141211;--panel:#1c1917;--ink:#f5f5f4;--mute:#a8a29e;--line:#2e2a27;--me:#292524}}
+:root[data-theme="dark"]{--bg:#141211;--panel:#1c1917;--ink:#f5f5f4;--mute:#a8a29e;--line:#2e2a27;--me:#292524}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel)}
+.logo{font-weight:800;font-size:18px;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+header .sp{flex:1}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:6px 12px}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+main{flex:1;display:flex;min-height:0}
+#chat{width:380px;max-width:100%;display:flex;flex-direction:column;border-inline-end:1px solid var(--line);background:var(--panel)}
+#msgs{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.m{padding:9px 12px;border-radius:14px;max-width:92%;white-space:pre-wrap;word-break:break-word}
+.m.u{background:var(--me);align-self:flex-start}
+.m.a{border:1px solid var(--line);align-self:flex-start}
+.m.err{color:#dc2626;border-color:#dc2626}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 14px 10px}
+.chips button{font-size:13px;border-radius:99px}
+form,.box{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
+textarea{flex:1;resize:none;height:56px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:8px 10px;font:inherit}
+#go{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#fff;border:0;font-weight:700;padding:0 16px}
+#go:disabled{opacity:.5}
+#stage{flex:1;display:flex;flex-direction:column;min-width:0}
+.bar{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+.view{flex:1;min-height:0;overflow:auto;display:flex;justify-content:center;background:var(--bg);padding:12px}
+#frame{background:#fff;border:1px solid var(--line);border-radius:12px;width:100%;height:100%;transition:width .2s}
+#code{display:none;width:100%;height:100%;margin:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);font:12px/1.5 ui-monospace,Menlo,monospace;direction:ltr;text-align:left;overflow:auto;white-space:pre}
+.empty{margin:auto;text-align:center;color:var(--mute)}
+#pname{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:6px 10px;font:inherit;width:150px;min-width:0}
+header{flex-wrap:wrap}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:5;padding:16px}
+#ov .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;width:560px;max-width:100%;max-height:85%;display:flex;flex-direction:column}
+#ov h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+#list{overflow:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.row{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.row b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row small{color:var(--mute)}
+#viewer{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;z-index:6;padding-top:env(safe-area-inset-top,0px)}
+#viewer iframe{flex:1;border:0;background:#fff}
+@media(max-width:800px){
+ main{flex-direction:column}
+ #chat{width:100%;height:46%;border-inline-end:0;border-bottom:1px solid var(--line)}
+ .dev{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+ <span class="logo">✦ بنّاء</span>
+ <span class="sp"></span>
+ <input id="pname" placeholder="اسم المشروع" maxlength="60">
+ <button id="newp">➕ جديد</button>
+ <button id="mine">📁 مشاريعي</button>
+ <button id="gal">🌐 المعرض</button>
+ <button id="hist" title="الإصدارات">↶</button>
+ <button id="pub">🚀 نشر</button>
+ <button id="dl">⬇</button>
+ <button id="lnk">🔗 رابط مباشر</button>
+</header>
+<main>
+ <section id="chat">
+  <div id="msgs"><div class="m a">مرحباً! صف لي التطبيق أو الموقع الذي تريده وسأبنيه لك مباشرة، ثم عدّل عليه بالمحادثة.</div></div>
+  <div class="chips" id="chips"></div>
+  <div class="box">
+   <textarea id="inp" placeholder="مثال: تطبيق مهام بتصميم عصري…"></textarea>
+   <button id="go">إنشاء</button>
+  </div>
+ </section>
+ <section id="stage">
+  <div class="bar">
+   <button id="tp" class="on">معاينة</button>
+   <button id="tc">الكود</button>
+   <span style="flex:1"></span>
+   <button class="dev on" data-w="100%">🖥</button>
+   <button class="dev" data-w="768px">▭</button>
+   <button class="dev" data-w="390px">📱</button>
+  </div>
+  <div class="view">
+   <div class="empty" id="empty"><div style="font-size:40px">✦</div>معاينة تطبيقك تظهر هنا</div>
+   <iframe id="frame" sandbox="allow-scripts allow-forms allow-modals" style="display:none"></iframe>
+   <pre id="code"></pre>
+  </div>
+ </section>
+</main>
+<div id="ov"><div class="card"><h3><span id="ovt"></span><button id="ovx">✕</button></h3><div id="list"></div></div></div>
+<div id="viewer"><div class="bar"><b id="vt" style="flex:1"></b><button id="vfork">⎘ استنساخ</button><button id="vx">✕ إغلاق</button></div><iframe id="vf" sandbox="allow-scripts allow-forms allow-modals"></iframe></div>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var msgs=$('msgs'),inp=$('inp'),go=$('go'),frame=$('frame'),codeEl=$('code'),empty=$('empty');
+var versions=[],busy=false,sample=null,downloads=null,db=null,uid=null,pid=null,projs=[],pubs=[],msgLog=[],vcur=null;
+var SYS="أنت مهندس واجهات خبير. ابنِ تطبيق ويب كاملاً في ملف HTML واحد مستقل (CSS وJS مضمّنان)، دون أي موارد خارجية (لا خطوط ولا صور ولا مكتبات ولا شبكة)، بتصميم عصري متجاوب وتفاعلات حقيقية. اكتب كوداً مضغوطاً بلا تعليقات ولا تكرار. اجعل الصفحة rtl إن كان الطلب بالعربية. أعد كود HTML فقط دون شرح ودون ```.";
+var SYSE="عدّل ملف HTML التالي حسب الطلب. لا تعد الملف كاملاً أبداً. أعد فقط كتل استبدال بهذا الشكل حرفياً (نص SEARCH منسوخ تماماً من الملف وقصير وفريد):\n<<<<<<< SEARCH\nالنص القديم\n=======\nالنص الجديد\n>>>>>>> REPLACE\nيمكنك تكرار الكتل. بلا شرح.";
+function patch(h,t){var re=/<<<<<<< SEARCH\r?\n([\s\S]*?)\r?\n=======\r?\n([\s\S]*?)\r?\n?>>>>>>> REPLACE/g,m,n=0;while((m=re.exec(t))){var i=h.indexOf(m[1]);if(i<0)return null;h=h.slice(0,i)+m[2]+h.slice(i+m[1].length);n++}return n?h:null}
+var ideas=["تطبيق مهام أنيق","صفحة هبوط لمقهى","حاسبة قروض تفاعلية","لعبة ذاكرة"];
+ideas.forEach(function(t){var b=document.createElement('button');b.textContent=t;b.onclick=function(){inp.value=t;send()};$('chips').appendChild(b)});
+claude.use('sample').then(function(s){sample=s;if(!s)add('a err','الذكاء الاصطناعي غير متاح في هذا العرض.')}).catch(function(){});
+claude.use('db').then(async function(d){
+ if(!d){note('التخزين غير متاح في هذا العرض، لن تُحفظ المشاريع.');return}
+ db=d;
+ try{var u=await claude.use('user');uid=u?await u.id():null}catch(e){}
+ if(!uid){note('سجّل الدخول لحفظ مشاريعك.');db=null;return}
+ db.collection('data/users/'+uid).onSnapshot(function(sn){projs=sn.docs.map(function(x){return Object.assign({id:x.id},x.data())}).sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});if($('ov').dataset.m==='mine')render()},function(){});
+ db.collection('published').onSnapshot(function(sn){pubs=sn.docs.map(function(x){return Object.assign({id:x.id},x.data())}).sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});if($('ov').dataset.m==='gal')render()},function(){});
+}).catch(function(){});
+claude.use('downloads').then(function(d){downloads=d}).catch(function(){});
+function add(c,t,nolog){if(!nolog&&c!=='a err')msgLog.push([c,t]);var d=document.createElement('div');d.className='m '+c;d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d}
+function note(t){add('a',t,true)}
+function esc(t){var d=document.createElement('div');d.textContent=t||'';return d.innerHTML}
+function ago(t){return t?new Date(t).toLocaleDateString('ar'):''}
+async function save(){
+ if(!db||!versions.length)return;
+ if(!pid)pid='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ var code=versions[versions.length-1];
+ var hist=versions.slice(-3,-1);
+ var doc={name:$('pname').value.trim()||'مشروع بدون اسم',code:code,history:hist,msgs:msgLog.slice(-24),published:isPub(),updatedAt:Date.now()};
+ while(JSON.stringify(doc).length>230000&&doc.history.length)doc.history.shift();
+ if(JSON.stringify(doc).length>250000){add('a err','المشروع كبير جداً للحفظ.');return}
+ try{await db.doc('data/users/'+uid+'/'+pid).set(doc);if(doc.published)await pushPub(doc)}catch(e){add('a err','تعذّر حفظ المشروع.')}
+}
+function isPub(){var p=projs.find(function(x){return x.id===pid});return !!(p&&p.published)}
+async function pushPub(doc){await db.doc('published/'+pid).set({name:doc.name,code:doc.code,owner:uid,updatedAt:Date.now()})}
+function loadProj(p){
+ pid=p.id;versions=(p.history||[]).concat([p.code]);msgLog=(p.msgs||[]).slice();
+ msgs.innerHTML='';msgLog.forEach(function(m){add(m[0],m[1],true)});
+ $('pname').value=p.name||'';$('chips').style.display='none';show(p.code);closeOv();
+}
+function newProj(){pid=null;versions=[];msgLog=[];msgs.innerHTML='';note('مشروع جديد. صف ما تريد بناءه.');$('pname').value='';frame.style.display='none';codeEl.style.display='none';empty.style.display='';$('chips').style.display='flex';closeOv()}
+function closeOv(){$('ov').style.display='none';$('ov').dataset.m=''}
+function openOv(m){$('ov').dataset.m=m;$('ov').style.display='flex';$('ovt').textContent=m==='mine'?'مشاريعي':'المعرض (تطبيقات منشورة)';render()}
+function render(){
+ var m=$('ov').dataset.m,L=$('list');L.innerHTML='';
+ if(!db){L.innerHTML='<div class="empty" style="padding:20px">التخزين غير متاح.</div>';return}
+ var arr=m==='mine'?projs:pubs;
+ if(!arr.length){L.innerHTML='<div class="empty" style="padding:20px">'+(m==='mine'?'لا توجد مشاريع بعد.':'لا توجد تطبيقات منشورة بعد.')+'</div>';return}
+ arr.forEach(function(p){
+  var r=document.createElement('div');r.className='row';
+  r.innerHTML='<b>'+esc(p.name)+(p.published?' 🌐':'')+'</b><small>'+ago(p.updatedAt)+'</small>';
+  var o=document.createElement('button');o.textContent='فتح';
+  o.onclick=function(){m==='mine'?loadProj(p):openViewer(p)};r.appendChild(o);
+  if(m==='mine'){var x=document.createElement('button');x.textContent='🗑';x.onclick=async function(){try{await db.doc('data/users/'+uid+'/'+p.id).delete();if(p.published)await db.doc('published/'+p.id).delete();if(pid===p.id)newProj()}catch(e){}};r.appendChild(x)}
+  else if(p.owner===uid){var y=document.createElement('button');y.textContent='إلغاء النشر';y.onclick=async function(){try{await db.doc('published/'+p.id).delete();await db.doc('data/users/'+uid+'/'+p.id).update({published:false})}catch(e){}};r.appendChild(y)}
+  L.appendChild(r)})
+}
+function openViewer(p){vcur=p;$('vt').textContent=p.name;$('vf').srcdoc=p.code;$('viewer').style.display='flex';closeOv()}
+$('vx').onclick=function(){$('viewer').style.display='none';$('vf').srcdoc=''};
+$('vfork').onclick=function(){if(!vcur)return;pid=null;versions=[vcur.code];msgLog=[];msgs.innerHTML='';note('تم استنساخ «'+vcur.name+'». اطلب ما تريد تعديله.');$('pname').value=vcur.name+' (نسخة)';$('chips').style.display='none';show(vcur.code);$('vx').onclick();save()};
+$('lnk').onclick=function(){if(!versions.length){add('a','ابنِ تطبيقاً أولاً.');return}$('dl').onclick();add('a','لإنشاء رابط مباشر مستقل: أرسل ملف التطبيق الذي نزّلته الآن إلى Claude في محادثة عادية واكتب «انشره برابط مباشر»، وسأنشره لك في صفحة برابط خاص به.')};
+$('mine').onclick=function(){openOv('mine')};$('gal').onclick=function(){openOv('gal')};$('ovx').onclick=closeOv;$('newp').onclick=newProj;
+$('pname').addEventListener('change',function(){if(pid)save()});
+$('pub').onclick=async function(){
+ if(!versions.length){add('a','ابنِ تطبيقاً أولاً.');return}
+ if(!db){add('a err','النشر يحتاج التخزين.');return}
+ await save();
+ var doc={name:$('pname').value.trim()||'مشروع بدون اسم',code:versions[versions.length-1]};
+ try{await pushPub(doc);await db.doc('data/users/'+uid+'/'+pid).update({published:true});add('a','تم النشر! التطبيق ظاهر الآن في «المعرض» لكل من يفتح المنصة. يُحدَّث تلقائياً مع كل تعديل.')}catch(e){add('a err','تعذّر النشر.')}
+};
+function clean(t){t=t.replace(/^\s*```(?:html)?\s*/i,'').replace(/```\s*$/,'');var i=t.search(/<!doctype|<html/i);return i>0?t.slice(i):t}
+function show(h){empty.style.display='none';if($('tc').classList.contains('on')){codeEl.style.display='block';frame.style.display='none'}else{frame.style.display='block';codeEl.style.display='none'}frame.srcdoc=h;codeEl.textContent=h}
+async function send(){
+ var t=inp.value.trim();if(!t||busy)return;
+ if(!sample){add('a err','الذكاء الاصطناعي غير متاح حالياً.');return}
+ busy=true;go.disabled=true;inp.value='';$('chips').style.display='none';
+ add('u',t);var st=add('a','جارٍ البناء…');
+ var cur=versions.length?versions[versions.length-1]:null;
+ var used=0;
+ async function gen(p,tier,live){used+=p.length;var r=await sample(p,{cache:false,modelTier:tier,onText:function(o){st.textContent='جارٍ الكتابة… '+o.text.length+' حرف';if(live)codeEl.textContent=clean(o.text)}});used+=r.text.length;return r.text}
+ try{
+  var h=null;
+  if(cur){
+   var out=await gen(SYSE+"\n\nالملف:\n"+cur+"\n\nالطلب: "+t,'quick',false);
+   h=patch(cur,out);
+   if(!h&&/<!doctype|<html/i.test(out))h=clean(out);
+   if(!h){st.textContent='جارٍ إعادة الإنشاء الكامل…';h=clean(await gen(SYS+"\n\nالكود الحالي:\n"+cur+"\n\nعدّل حسب الطلب وأعد الملف كاملاً.\nالطلب: "+t,'default',true))}
+  }else{h=clean(await gen(SYS+"\n\nالطلب: "+t,'default',true))}
+  if(!/<\/html>/i.test(h)&&!/<\/body>/i.test(h)){h+="\n</body></html>"}
+  versions.push(h);show(h);if(!$('pname').value.trim())$('pname').value=t.slice(0,40);save();
+  st.textContent='تم! (≈ '+Math.round(used/3.5).toLocaleString('ar')+' توكن) جرّب التطبيق واطلب أي تعديل.';
+ }catch(e){
+  st.className='m a err';
+  st.textContent=e&&e.code==='not_granted'?'يلزم الموافقة على استخدام الذكاء الاصطناعي.':e&&e.code==='rate_limited'?'طلبات كثيرة، حاول بعد قليل.':'تعذّر البناء، حاول مجدداً.';
+ }
+ busy=false;go.disabled=false;
+}
+go.onclick=send;
+inp.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('tp').onclick=function(){$('tp').classList.add('on');$('tc').classList.remove('on');codeEl.style.display='none';if(versions.length)frame.style.display='block'};
+$('tc').onclick=function(){$('tc').classList.add('on');$('tp').classList.remove('on');frame.style.display='none';if(versions.length)codeEl.style.display='block'};
+document.querySelectorAll('.dev').forEach(function(b){b.onclick=function(){document.querySelectorAll('.dev').forEach(function(x){x.classList.remove('on')});b.classList.add('on');frame.style.width=b.dataset.w;frame.style.margin='0 auto'}});
+$('hist').onclick=function(){if(versions.length>1){versions.pop();show(versions[versions.length-1]);add('a','تم التراجع إلى الإصدار السابق.');save()}else add('a','لا يوجد إصدار سابق.')};
+$('dl').onclick=async function(){
+ if(!versions.length){add('a','ابنِ شيئاً أولاً.');return}
+ var h=versions[versions.length-1];
+ try{if(downloads){await downloads.save({filename:'app.html',data:h})}else{await navigator.clipboard.writeText(h);add('a','تم نسخ الكود.')}}catch(e){}
+};
+})();
+</script>
+</body>
+</html>
